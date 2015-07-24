@@ -12,7 +12,7 @@ end;
 if flag st = query(obj,'*IDN?'); end;
 
 if (isempty(findstr(st,ID)))' 
-    obj = 0; 
+    obj = ''; 
 end;
 
 

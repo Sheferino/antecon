@@ -1,5 +1,6 @@
-function [obj, st]= open_VSG(ip_adres,port_number,ID)
+function [obj, st]= open_VSG(ip_adres,ID)
 
+port_number = 5025;
 flag = 1;
 
 try
@@ -12,7 +13,7 @@ end;
 if flag st = query(obj,'*IDN?'); end;
 
 if (isempty(findstr(st,ID)))' 
-    obj = 0; 
+    obj = ''; 
 end;
 
 
