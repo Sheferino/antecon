@@ -31,7 +31,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         st = '';
         B = ['68686868' '00000005' '00000012' '00000000' Key_adr];
         st = query(Ant,B);
-        disp (st);
+        disp(st);
         if findstr(st,komand) ~= 0
             k = 1;
         else
@@ -59,7 +59,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         end;
     end
 
-    function k = calib_PW(PW) %handle is needed   %проверить ответ, без ваттметра к = 1!!
+    function k = calib_PW(PW) %handle is needed
+                    
        st = query(PW,'CAL?');
        flag = str2double(st);
        if flag == 1
@@ -76,22 +77,21 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
            end;
        else
            st = query(PW,'*IDN?');
-           if isempty(st) k = 1; 
-           else k = 0;
-           end;
+           disp(st); 
        end;
        
        if k == 1
            fprintf(PW,'CALC1:FEED1 "POW:AVER"');
            %fprintf(PW,'');
+           fprintf(PW,'FORM REAL');
        else
            disp('Calibration is failed for:');
            disp(PW);
        end;
-    end
+          
+    end %end calib_PW
 
     function P = get_PW(PW)
-        fprintf(PW,'FORM REAL');
         st = query(PW,'MEAS1?');
         P = str2double(st);
     end
@@ -140,6 +140,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         %calibration procedure
         
         %part 1
+        disp('calib part 1');
+        
         B = [':FREQ ' f_sig 'MHz'];
         fprintf(VSG,B);
         fprintf(VSG,':UNIT:POW dBm');
@@ -162,6 +164,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         end
         
         %part 2
+        disp('calib part 2');
+        
         k1 = turn_key(Ant,Key32_adr,'00000000'); %key W32 to AB/CD
         k2 = turn_key(Ant,Key25_adr,'00000000'); %key W25 to AB/CD
         k3 = turn_key(Ant,Key9_adr,'00000000'); %key W9 to AB/CD
@@ -188,6 +192,9 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         kalib2 = kalib2_1*kalib2_2;
         
         %part 3
+        
+        disp('calib part 3');
+        
         k1 = turn_key(Ant,Key32_adr,'00000000'); %key W32 to AB/CD
         k2 = turn_key(Ant,Key25_adr,'00000000'); %key W25 to AB/CD
         k3 = turn_key(Ant,Key28_adr,'00000001'); %key W28 to BC/AD
@@ -217,6 +224,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         kalib3 = kalib3_1 * kalib3_2;
         
         %part 3v
+        
+        disp('calib part 3v');
         
         k1 = turn_key(Ant,Key32_adr,'00000000'); %key W32 to AB/CD
         k2 = turn_key(Ant,Key25_adr,'00000000'); %key W25 to AB/CD
@@ -256,6 +265,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         kalib3v = kalib3v_1 * kalib3v_2 * kalib3v_3;
         
         %part 4
+        
+        disp('calib part 4');
         
         k1 = turn_key(Ant,Key32_adr,'00000000'); %key W32 to AB/CD
         k2 = turn_key(Ant,Key25_adr,'00000000'); %key W25 to AB/CD
@@ -300,6 +311,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         
         %part 5
         
+        disp('calib part 5');
+        
         k1 = turn_NG(Ant,NG1_adr,'00000001');
         k2 = turn_key(Ant,Key9_adr,'00000000'); %key W9 to AB/CD
         k3 = turn_key(Ant,Key3_adr,'00000001'); %key W3 to BC/AD
@@ -343,8 +356,20 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         k1 = turn_NG(Ant,NG1_adr,'00000000');
         k2 = turn_NG(Ant,NG2_adr,'00000000');
                                
+        %part for BMSTU
+        
+        disp('calib part BMSTU');
+        
+        kalib6 = 1;
+        
         %calculations
-        if (kalib1 * kalib2 * kalib3 * kalib3v * kalib4 * kalib5) ~= 0
+        
+        disp('calib calc');
+        
+        if (kalib1 * kalib2 * kalib3 * kalib3v * kalib4 * kalib5 * kalib6) ~= 0
+        
+            %added constants are switch parameters
+            %it might be specified with real switches  
             
             fi246 = P0 - P_A15_2 - 0.04; % - LW28AB
             fin = 0.04 + 0.05; % LW28BC + LK23
