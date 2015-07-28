@@ -1,4 +1,4 @@
-function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration_path(Ant,PW1,PW2,PW3,PW4,VSG,f_sig,P0,PA6,PA7)
+function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,f_sig,P0,PA6,PA7)
 %%  
 
 %PW1 - A19, PW2 - A15, PW3 - A5, PW4 - A21
@@ -77,7 +77,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
            end;
        else
            st = query(PW,'*IDN?');
-           disp(st); 
+           disp(st);
+           k = 0;
        end;
        
        if k == 1
@@ -86,6 +87,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
            fprintf(PW,'FORM REAL');
        else
            disp('Calibration is failed for:');
+           disp(st);
            disp(PW);
        end;
           
@@ -94,6 +96,15 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
     function P = get_PW(PW)
         st = query(PW,'MEAS1?');
         P = str2double(st);
+    end
+
+    function P = get_VSA(VSA)
+        fprintf(VSA,':CHP:AVER OFF');
+        pause(0.1);
+        fprintf(VSA,':CHP:AVER ON');
+        fprintf(VSA,':CHP:AVER:COUNt 1000');
+        
+        fprintf(VSA,':READ:CHP:CHP?');
     end
 
     Key3_adr = '00000011';  %W3
@@ -132,8 +143,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
     
     k_sum_PW = k1*k2*k3*k4;
          
-    %k_sum_keys = 1; %switch it off in real function
-    %k_sum_PW = 1;   %switch it off in real function
+    k_sum_keys = 1; %switch it off in real function
+    k_sum_PW = 1;   %switch it off in real function
     
     if (k_sum_keys == 1) && (k_sum_PW == 1) 
         
@@ -142,6 +153,19 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         %part 1
         disp('calib part 1');
         
+        %for analyser
+        fprintf(VSA,':SYST:PRES');  %switch off in real operating
+        pause(0.5);                 %switch off in real operating
+        fprintf(VSA,':CONF:CHP');
+        pause(0.5);                 %switch off in real operating
+        fprintf(VSA,':CHP:AVER:COUNt 1000');
+        fprintf(VSA,':CHP:AVER:OFF');
+        B = [':FREQ:CENT ' f_sig 'MHz'];
+        fprintf(VSA,B);
+        fprintf(VSA,':CHP:BAND:INT 40 MHz');
+        fprintf(VSA,':CHP:AVER ON');
+         
+        %for generator
         B = [':FREQ ' f_sig 'MHz'];
         fprintf(VSG,B);
         fprintf(VSG,':UNIT:POW dBm');
@@ -160,7 +184,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             fi1 = P0-P_A19_1;
             kalib1 = 1;            
         else
-            kalib1 = 0;            
+            P_A19_1 = 0;
+            kalib1 = 0;
         end
         
         %part 2
@@ -175,9 +200,11 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A15_2 = get_PW(PW2);
             kalib2_1 = 1;            
         else
+            P_A15_2 = 0;
             kalib2_1 = 0;
         end
         
+        %gener to 14 GHZ
         k5 = turn_key(Ant,Key25_adr,'00000001'); %key W25 to AD/BC
         k6 = turn_key(Ant,Key8_adr,'00000001'); %key W8 to In1Out2
         k7 = turn_key(Ant,Key23_adr,'00000001'); %key W23 to In1Out2
@@ -186,6 +213,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A5_2 = get_PW(PW3);
             kalib2_2 = 1;            
         else
+            P_A5_2 = 0;
             kalib2_2 = 0;
         end
         
@@ -195,6 +223,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         
         disp('calib part 3');
         
+        %gener to 1.5 GHz
         k1 = turn_key(Ant,Key32_adr,'00000000'); %key W32 to AB/CD
         k2 = turn_key(Ant,Key25_adr,'00000000'); %key W25 to AB/CD
         k3 = turn_key(Ant,Key28_adr,'00000001'); %key W28 to BC/AD
@@ -206,9 +235,11 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A15_3 = get_PW(PW2);
             kalib3_1 = 1;            
         else
+            P_A15_3 = 0;
             kalib3_1 = 0;
         end
         
+        %gener to 14 GHz
         k7 = turn_key(Ant,Key25_adr,'00000001'); %key W25 to BC/AD
         k8 = turn_key(Ant,Key23_adr,'00000000'); %key W23 to In1Out1
         k9 = turn_key(Ant,Key8_adr,'00000000'); %key W8 to In1Out1
@@ -218,6 +249,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A5_3 = get_PW(PW3);
             kalib3_2 = 1;            
         else
+            P_A5_3 = 0;
             kalib3_2 = 0;
         end
         
@@ -227,6 +259,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         
         disp('calib part 3v');
         
+        %gener to 1.5 GHz
         k1 = turn_key(Ant,Key32_adr,'00000000'); %key W32 to AB/CD
         k2 = turn_key(Ant,Key25_adr,'00000000'); %key W25 to AB/CD
         k3 = turn_key(Ant,Key9_adr,'00000000'); %key W9 to AB/CD
@@ -238,9 +271,12 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A15_3v = get_PW(PW2);            
             kalib3v_1 = 1;            
         else
+            P_A19_3v = 0;
+            P_A15_3v = 0;
             kalib3v_1 = 0;
         end
         
+        %gener to 14 GHz
         k7 = turn_key(Ant,Key25_adr,'00000001'); %key W25 to BC/AD
         k8 = turn_key(Ant,Key23_adr,'00000001'); %key W23 to In1Out2
         k9 = turn_key(Ant,Key8_adr,'00000001'); %key W8 to In1Out2
@@ -249,6 +285,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A5_3v = get_PW(PW3);
             kalib3v_2 = 1;            
         else
+            P_A5_3v = 0;
             kalib3v_2 = 0;
         end
         
@@ -259,6 +296,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A21_3v = get_PW(PW4);
             kalib3v_3 = 1;            
         else
+            P_A21_3v = 0;
             kalib3v_3 = 0;
         end
         
@@ -268,6 +306,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         
         disp('calib part 4');
         
+        %gener to 1.5 GHz
         k1 = turn_key(Ant,Key32_adr,'00000000'); %key W32 to AB/CD
         k2 = turn_key(Ant,Key25_adr,'00000000'); %key W25 to AB/CD
         k3 = turn_key(Ant,Key28_adr,'00000001'); %key W28 to BC/AD
@@ -280,9 +319,12 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A15_4 = get_PW(PW2);            
             kalib4_1 = 1;            
         else
+            P_A19_4 = 0;
+            P_A15_4 = 0;
             kalib4_1 = 0;
         end
         
+        %gener to 14 GHz
         k7 = turn_key(Ant,Key25_adr,'00000001'); %key W25 to BC/AD
         k8 = turn_key(Ant,Key23_adr,'00000001'); %key W23 to In1Out2
         k9 = turn_key(Ant,Key8_adr,'00000000'); %key W8 to In1Out1
@@ -293,6 +335,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A21_4 = get_PW(PW4);
             kalib4_2 = 1;            
         else
+            P_A21_4 = 0;
             kalib4_2 = 0;
         end
         
@@ -302,12 +345,13 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A5_4 = get_PW(PW3);
             kalib4_3 = 1;            
         else
+            P_A5_4 = 0;
             kalib4_3 = 0;
         end
         
         kalib4 = kalib4_1 * kalib4_2 * kalib4_3;       
         
-        fprintf(gen,':OUTP OFF');
+        fprintf(VSG,':OUTP OFF');
         
         %part 5
         
@@ -325,6 +369,8 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A15_5 = get_PW(PW2);
             kalib5_1 = 1;            
         else
+            P_A19_5 = 0;
+            P_A15_5 = 0;
             kalib5_1 = 0;
         end
         
@@ -338,6 +384,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A5_5 = get_PW(PW3);
             kalib5_2 = 1;            
         else
+            P_A5_5 = 0;
             kalib5_2 = 0;
         end
         
@@ -348,6 +395,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             P_A21_5 = get_PW(PW4);
             kalib5_3 = 1;            
         else
+            P_A21_5 = 0;
             kalib5_3 = 0;
         end
         
@@ -356,7 +404,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         k1 = turn_NG(Ant,NG1_adr,'00000000');
         k2 = turn_NG(Ant,NG2_adr,'00000000');
                                
-        %part for BMSTU
+        %part 6 for BMSTU
         
         disp('calib part BMSTU');
         
@@ -369,7 +417,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
         if (kalib1 * kalib2 * kalib3 * kalib3v * kalib4 * kalib5 * kalib6) ~= 0
         
             %added constants are switch parameters
-            %it might be specified with real switches  
+            %they might be specified with real switches  
             
             fi246 = P0 - P_A15_2 - 0.04; % - LW28AB
             fin = 0.04 + 0.05; % LW28BC + LK23
@@ -391,6 +439,7 @@ function [fi1,fi246,fi248,fi39,fi311,fin,fi257,fi2510,fi12,LL,LKu] = calibration
             disp(kalib3v);
             disp(kalib4);
             disp(kalib5);
+            disp(kalib6);
             
             fi1 = 0;
             fi246 = 0;

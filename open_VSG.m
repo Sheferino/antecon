@@ -9,6 +9,7 @@ try
     fopen(obj);
 catch
     flag = 0;
+    st = 'VSG tcp/ip opening error';
 end;
 
 if flag 
@@ -17,7 +18,7 @@ end;
 
 if findstr(st,ID) == 0 
     obj = '';
-    st = '';
+    st = 'VSG ID is not correct ' + ID;
 end;
 
 

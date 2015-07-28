@@ -9,6 +9,7 @@ try
     fopen(obj);
 catch
     flag = 0;
+    st = 'VSA tcp/ip opening error';
 end;
 
 if flag 
@@ -17,7 +18,7 @@ end;
 
 if findstr(st,ID) == 0
     obj = '';
-    st = '';
+    st = 'VSA ID is not correct ' + ID;
 end;
 
 

@@ -1,4 +1,4 @@
-function [obj, st]= open_Baum(ip_adres,port_number,ID)
+function [obj, st]= open_BM(ip_adres,port_number,ID)
 
 st = '';
 %port_number = 5025;
@@ -9,13 +9,14 @@ try
     fopen(obj);
 catch
     flag = 0;
+    st = 'BM tcp/ip opening error';
 end;
 
 if flag st = query(obj,'GET_IDN'); end;
 
 if findstr(st,ID) == 0 
     obj = '';
-    st = ''; 
+    st = 'BM ID is not correct ' + ID; 
 end;
 
 
