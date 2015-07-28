@@ -1,5 +1,6 @@
 function [obj, st]= open_PW(ip_adres,port_number,ID)
 
+st = '';
 flag = 1;
 
 try
@@ -11,8 +12,9 @@ end;
 
 if flag st = query(obj,'*IDN?'); end;
 
-if (isempty(findstr(st,ID)))' 
-    obj = ''; 
+if findstr(st,ID) == 0
+    obj = '';
+    st = '';
 end;
 
 

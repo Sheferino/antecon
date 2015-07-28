@@ -1,5 +1,6 @@
 function [obj, st]= open_VSA(ip_adres,ID)
 
+st = '';
 port_number = 5025;
 flag = 1;
 
@@ -10,10 +11,13 @@ catch
     flag = 0;
 end;
 
-if flag st = query(obj,'*IDN?'); end;
+if flag 
+    st = query(obj,'*IDN?'); 
+end;
 
-if (isempty(findstr(st,ID)))'
-    obj = ''; 
+if findstr(st,ID) == 0
+    obj = '';
+    st = '';
 end;
 
 
