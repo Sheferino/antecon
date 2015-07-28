@@ -1,6 +1,7 @@
-function [obj, st]= open_PW(ip_adres,port_number,ID)
+function [obj, st]= open_PW(ip_adres,ID)
 
 st = '';
+port_number = 5025;
 flag = 1;
 
 try

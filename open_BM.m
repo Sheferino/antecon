@@ -1,7 +1,7 @@
-function [obj, st]= open_BM(ip_adres,port_number,ID)
+function [obj, st]= open_BM(ip_adres,ID)
 
 st = '';
-%port_number = 5025;
+port_number = 5025;
 flag = 1;
 
 try

@@ -25,7 +25,7 @@ function probe1(VSA)
         disp(st);
     end;
     
-    %st = query(VSA,':READ:CHP:CHP?');
-    %disp(st);
+    st = query(VSA,':READ:CHP:CHP?');
+    disp(st);
 
 end
