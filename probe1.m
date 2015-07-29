@@ -1,8 +1,11 @@
 function probe1(VSA)
-    
-    
-    st = query(VSA,'*IDN?');
-    disp (st);
+    %    
+    st = '';
+    %
+    fprintf(VSA,':CHP:AVER OFF');
+
+    %st = query(VSA,'*IDN?');
+    %disp (st);
     
     %fprintf(VSA,':SYST:PRES');
     %pause(0.5);
@@ -14,14 +17,20 @@ function probe1(VSA)
     fprintf(VSA,':CHP:BAND:INT 40 MHz');
     
     fprintf(VSA,':CHP:AVER ON');
-    fprintf(VSA,':CHP:AVER:COUNt 1000');
+    fprintf(VSA,':CHP:AVER:COUNt 5000');
+    
+    fprintf(VSA,'*ESE 0');
     
     i = 0;
     while i == 0
-        st = query(VSA,':CHP:AVER:COUNt?');
+        try
+            st = query(VSA,'*ESR?');
+        catch
+            st = '';
+        end;
         i = str2double(st);
         pause(0.1);
-        disp('still wait');
+        disp('wait');
         disp(st);
     end;
     
