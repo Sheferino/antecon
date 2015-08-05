@@ -5,7 +5,7 @@ port_number = 5025;
 flag = 1;
 
 try
-    obj = tcpip(ip_adres,port_number);
+    obj = tcpip(ip_adres,port_number,'ByteOrder','littleEndian','InputBufferSize',1E6);
     fopen(obj);
 catch
     flag = 0;
@@ -13,7 +13,10 @@ catch
 end;
 
 if flag 
-    st = query(obj,'*IDN?'); 
+    st = query(obj,'*IDN?');
+    fprintf(obj,':CAL:AUTO OFF');   %mover from calib_path
+    pause(0.1);
+    fprintf(obj,':CAL');
 end;
 
 if findstr(st,ID) == 0

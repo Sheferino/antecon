@@ -1,4 +1,5 @@
-function A = get_VSA(VSA)
+function A = get_VSA(VSA, f)
+%f - MHz in string format
     
     fprintf(VSA,':SYSTem:PRESet');
     pause(0.5);
@@ -9,7 +10,8 @@ function A = get_VSA(VSA)
     fprintf(VSA,':CONF:SPEC');
     pause(0.5);
     
-    fprintf(VSA,':FREQ:CENT 2000 MHz');
+    B = [':FREQ:CENT ' f ' MHz'];
+    fprintf(VSA,B);
     pause(0.5);
     
     fprintf(VSA,':SPEC:FREQ:SPAN 40 MHz');
