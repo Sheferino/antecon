@@ -5,7 +5,8 @@ port_number = 5025;
 flag = 1;
 
 try
-    obj = tcpip(ip_adres,port_number,'ByteOrder','littleEndian','InputBufferSize',1E6);
+    obj = tcpip(ip_adres,port_number,'InputBufferSize',1E4);
+    % obj = tcpip(ip_adres,port_number,'InputBufferSize',1E5,'ByteOrder','littleEndian','Timeout', 10);
     fopen(obj);
 catch
     flag = 0;

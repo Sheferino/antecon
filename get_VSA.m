@@ -1,57 +1,75 @@
-function A = get_VSA(VSA, f)
+function [A, time] = get_VSA(VSA, f)
 %f - MHz in string format
     
-    fprintf(VSA,':SYSTem:PRESet');
-    pause(0.5);
+    %fprintf(VSA,':SYSTem:PRESet');
+    %pause(0.1);
     
-    fprintf(VSA,':INST:SEL BASIC');
-    pause(0.5);
+    %fprintf(VSA,':INST:SEL BASIC');
+    %pause(0.1);
     
-    fprintf(VSA,':CONF:SPEC');
-    pause(0.5);
+    fprintf(VSA,':CONF:WAV');
+    pause(0.1);
     
     B = [':FREQ:CENT ' f ' MHz'];
     fprintf(VSA,B);
-    pause(0.5);
-    
-    fprintf(VSA,':SPEC:FREQ:SPAN 40 MHz');
-    pause(0.5);
-    
-    fprintf(VSA,':SPECtrum:DIF:BANDwidth 40 MHz');
-    pause(0.5);
-    
-    fprintf(VSA,':SPEC:BAND:RES 100 kHz');
-    pause(0.5);
-    
-    %fprintf(VSA,':SPECtrum:AVERage:TACount 2')
-    %pause(2);
-        
-    fprintf(VSA,':DISPlay:SPECtrum:VIEW1:WINDow2:TRACe:Y:COUPle ON');
     pause(0.1);
     
+    fprintf(VSA,':WAV:SRAT 40 MHz'); %change to 10.23 * 4 in real oper
+    pause(0.1);
+              
     fprintf(VSA,':FORMat REAL,32');
-    pause(0.5);
+    pause(0.1);
     
-    fprintf(VSA,':INIT:PAUSe');
-    pause(0.5);
+    %fprintf(VSA,':INIT:PAUSe');
+    %pause(0.1);
     
-    fprintf(VSA,':READ:SPEC3?');
-    %[B,N1] = fread(VSA,10002,'float32');
-    [A,N1] = fread(VSA,10002,'float32');
-    pause(0.5);
+    fprintf(VSA,':READ:WAV0?');
+    pause(0.5)
+    %A(1:100000)=0;
+    
+    i = 1;
+    while (get(VSA,'BytesAvailable') > 0)
+        
+        C(i) = fread(VSA,1,'float');
+        pause(0.001);
+        %disp(VSA.BytesAvailable); %del in real oper
+        i = i+1;
+    
+    end;
+    pause(0.1);
+    
+    fprintf(VSA,':FORM ASCii');
+    pause(0.1);
+    
+    st = query(VSA,':READ:WAV1?');
+    pause(0.1)
+    
+    time = str2double(strtok(st,','));
+    pause(0.1)
+    
+    while (get(VSA,'BytesAvailable') > 0)
+       
+        B(i) = fread(VSA,1,'float');
+        pause(0.001);
+        i = i+1;
+    
+    end;
+    
+    C(1)=[];
+    %C(numel(C))=[];
+    
+    %A = reshape(C,numel(C)/2,2);
+    
+    for i = 1:numel(C)
+        
+        if i == numel(C) break; end;
+        if mod(i,2) ~= 0 A(ceil(i/2),1)=C(i); end;
+        if mod(i,2) == 0 A(ceil(i/2),2)=C(i); end;
+        
+    end;
     
     fprintf(VSA,':INIT:RESTart');
-    pause(0.5);
-    
-    %B(1) = []; %if 1st is wrong
-    %N1 = N1-1;
-    
-    %for i = 1:10000
-    %    if i == numel(B) break; end;
-    %    if mod(i,2) ~= 0 A(ceil(i/2),1)=B(i); end;
-    %    if mod(i,2) == 0 A(ceil(i/2),2)=B(i); end;
-        
-    %end;
+    pause(0.1);
                
 end
 
