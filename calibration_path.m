@@ -12,7 +12,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
 % PA7 - NG2 power
 
 
-    function key = open_key(Ant,Key_adr)
+    function key = open_key(Ant,Key_adr)    %just check connection with key
         %B = [hex2dec('68686868') hex2dec('5') hex2dec('12') hex2dec('0') hex2dec(Key)];
         B = ['68686868' '00000005' '00000012' '00000000' Key_adr];
         
@@ -28,7 +28,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         end;
     end
 
-    function NG = open_NG(Ant,NG_adr)
+    function NG = open_NG(Ant,NG_adr)       %just check connection with NG
         B = ['68686868' '00000005' '00000014' '00000000' NG_adr];
         st = query(Ant,B);
         if findstr(st,'1014') NG = 1;
@@ -36,7 +36,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         end
     end
     
-    function k = turn_key(Ant,Key_adr,komand)
+    function k = turn_key(Ant,Key_adr,komand)   %turn key to position 'komand'
         st = '';
         B = ['68686868' '00000005' '00000012' '00000000' Key_adr];
         st = query(Ant,B);
@@ -52,7 +52,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         end;
     end
     
-    function NG = turn_NG(Ant,NG_adr,komand)
+    function NG = turn_NG(Ant,NG_adr,komand)    %turn NG to position 'komand'
         st = '';
         B = ['68686868' '00000005' '00000014' '00000000' NG_adr];
         st = query(Ant,B);
@@ -68,7 +68,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         end;
     end
 
-    function k = calib_PW(PW) %handle is needed
+    function k = calib_PW(PW)               %PW self-calibration
                     
        st = query(PW,'CAL?');
        flag = str2double(st);
@@ -102,13 +102,13 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
           
     end %end calib_PW
 
-    function P = get_PW(PW)
+    function P = get_PW(PW)                 %get PW data (power, 1 val)
         st = query(PW,'MEAS1?');
         P = str2double(st);
     end
 
     function P = ask_VSA(VSA)
-        st = query(VSA,':CALC:SPEC:MARK1:FUNC:RES?');
+        st = query(VSA,':CALC:SPEC:MARK1:FUNC:RES?');   %get VSA data (power, 1 val)
         P = str2double(st);
     end
 
@@ -131,6 +131,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
     NG1_adr = '00000021'; %A6
     NG2_adr = '00000022'; %A7
     
+    %keys and NG check1
     k1 = open_key(Ant,Key3_adr);
     k2 = open_key(Ant,Key9_adr);
     k3 = open_key(Ant,Key25_adr);
@@ -146,6 +147,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         
     k_sum_keys = k1*k2*k3*k4*k5*k6*k7*k8*k9*k10*k11*k12;
     
+    %PW self-calibration
     k1 = calib_PW(PW1);
     k2 = calib_PW(PW2);
     k3 = calib_PW(PW3);
@@ -185,9 +187,9 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         B = [':CALC:SPEC:MARK1:X ' f_sig ' MHz'];
         fprintf(VSA,B);  %marker to center freq
         pause(0.1);
-        fprintf(VSA,':CALC:SPEC:MARK1:FUNC BPOW');  %marker on in band pow mode
+        fprintf(VSA,':CALC:SPEC:MARK1:FUNC BPOW');  %marker on in band power mode
         pause(0.1);
-        fprintf(VSA,':CALC:SPEC:MARK1:FUNC:BAND:SPAN 20 MHz');
+        fprintf(VSA,':CALC:SPEC:MARK1:FUNC:BAND:SPAN 20 MHz'); %measuring in 20 MHz
         pause(0.1);
         %fprintf(VSA,':CAL:AUTO OFF');   %moved to open
         %pause(0.1);
@@ -200,7 +202,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         pause(0.1);
         fprintf(VSG,':UNIT:POW dBm');
         pause(0.1);
-        fprintf(VSG,':POW:LEV 0'); %output power = 0 dBm
+        fprintf(VSG,':POW:LEV -20'); %output power = 0 dBm
         pause(0.1);
         fprintf(VSG,':OUTP:MOD OFF');   %without modulation
         pause(0.1);
@@ -210,9 +212,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         % -------------------------------
          %part 1
         disp('calib part 1');
-        
-        
-        
+              
         k1 = turn_key(Ant,Key32_adr,'00000001'); %key W32 to BC/AD
         k2 = turn_key(Ant,Key25_adr,'00000000'); %key W25 to AB/CD
         k3 = turn_key(Ant,Key9_adr,'00000000'); %key W9 to AB/CD
@@ -305,11 +305,11 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
                 
                 B = [':CALC:SPEC:MARK1:X ' '14033' ' MHz'];
                 fprintf(VSA,B);  %marker to center freq
-                pause(0.1);
-                
+                                
                 pause(3);
                 
                 P_VSA_3 = ask_VSA(VSA);
+                pause(0.1);
                 
                 B = [':FREQ:CENT ' f_sig ' MHz'];    %VSA to f_dis
                 fprintf(VSA,B);
@@ -322,6 +322,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
                 kalib3 = 1;            
             else
                 P_A5_3 = 0;
+                P_VSA_3 = 0;
                 kalib3 = 0;
             end
         
@@ -348,6 +349,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
             else
                 P_A19_3v = 0;
                 P_A15_3v = 0;
+                P_VSA_3v = 0;
                 kalib3v = 0;
             end
             
@@ -532,6 +534,16 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         %calculations
         
         disp('calib calc');
+        
+        %-------------- del in real oper
+        kalib1 = 1;
+        kalib2 = 1;
+        kalib3 = 1;
+        kalib3v = 1;
+        kalib4 = 1;
+        kalib5 = 1;
+        kalib6 = 1;
+        %---------------
         
         if (kalib1 * kalib2 * kalib3 * kalib3v * kalib4 * kalib5 * kalib6) ~= 0
         
