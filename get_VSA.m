@@ -1,11 +1,11 @@
 function [A, time] = get_VSA(VSA, f)
 %f - MHz in string format
     
-    %fprintf(VSA,':SYSTem:PRESet');
-    %pause(0.1);
+    fprintf(VSA,':SYSTem:PRESet');
+    pause(0.1);
     
-    %fprintf(VSA,':INST:SEL BASIC');
-    %pause(0.1);
+    fprintf(VSA,':INST:SEL BASIC');
+    pause(0.1);
     
     fprintf(VSA,':CONF:WAV');
     pause(0.1);
@@ -47,6 +47,7 @@ function [A, time] = get_VSA(VSA, f)
     time = str2double(strtok(st,','));
     pause(0.1)
     
+    i = 1;
     while (get(VSA,'BytesAvailable') > 0)
        
         B(i) = fread(VSA,1,'float');

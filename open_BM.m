@@ -8,6 +8,7 @@ try
     obj = tcpip(ip_adres,port_number);
     fopen(obj);
 catch
+    obj = '';
     flag = 0;
     st = 'BM tcp/ip opening error';
 end;

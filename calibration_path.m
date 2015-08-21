@@ -70,17 +70,17 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
 
     function k = calib_PW(PW)               %PW self-calibration
                     
-       st = query(PW,'CAL?');
+       st = query(PW,':CAL?');
        flag = str2double(st);
        if flag == 1
            k = 0;
-           fprintf(PW,'CAL:ZERO:NORM:AUTO ONCE');
+           fprintf(PW,':CAL:ZERO:NORM:AUTO ONCE');
            while str2double(query(PW,'*OPC?')) ~= 1
            end;
-           fprintf(PW,'CAL');
+           fprintf(PW,':CAL');
            while str2double(query(PW,'*OPC?')) ~= 1
            end;
-           st = query(PW,'CAL?');
+           st = query(PW,':CAL?');
            if str2double(st) == 0 
                k = 1;
            end;
@@ -225,6 +225,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
             kalib1 = 1;            
         else
             P_A19_1 = 0;
+            fi1 = 0;
             kalib1 = 0;
         end
         
@@ -397,13 +398,25 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
             k6 = turn_key(Ant,Key3_adr,'00000001'); %key W3 to BC/AD
         
             if k1 * k2 * k3 * k4 * k5 * k6 ~= 0 
+                
+                pause(1);
+                
                 P_A19_4 = get_PW(PW1);
                 P_A15_4 = get_PW(PW2);
+                
+                fprintf(VSG,':OUTP OFF');
+                
+                fprintf(Baum,'setgenerator ON');
+                pause(1);
+                
                 fprintf(Baum,'A2:3->2'); %A2 - 3->2
                 fprintf(Baum,'A3:3->2'); %A3 - 3->2
                 pause(4);
                 fprintf(Baum,'A2:3->C'); %A2 - 3->C
                 fprintf(Baum,'A3:3->C'); %A3 - 3->C
+                
+                fprintf(Baum, 'setgenerator OFF');
+                
                 kalib4 = 1;            
             else
                 P_A19_4 = 0;
@@ -429,29 +442,41 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
                 kalib4_1 = 0;
             end
             
-            k11 = turn_key(Ant,Key31_adr,'00000001'); %key W31 to AD/BC
-            
-            if k11 ~=0
-                fprintf(Baum,'A3:3->2'); %A3 3->2
-                pause(4);
-                kalib4_2 = 1;
-            else
-                kalib4_2 = 0;
-            end;
-        
             k12 = turn_key(Ant,Key23_adr,'00000000'); %key W23 to In1Out1
         
             if k12 ~= 0 
                 P_A5_4 = get_PW(PW3);
-                kalib4_3 = 1;            
+                kalib4_2 = 1;            
             else
                 P_A5_4 = 0;
-                kalib4_3 = 0;
+                kalib4_2 = 0;
             end
-            kalib4 = kalib4_1 * kalib4_2*kalib4_3;          
+            
+            fprintf(VSG,':OUTP OFF');
+            
+            k10 = turn_key(Ant,Key23_adr,'00000001'); %key W23 to In1Out2
+            k11 = turn_key(Ant,Key31_adr,'00000001'); %key W31 to AD/BC
+            
+                       
+            if k10 * k11 ~=0
+                
+                fprintf(Baum,'setgenerator ON');
+                pause(1);
+                
+                fprintf(Baum,'A3:3->2'); %A3 3->2
+                pause(4);
+                
+                fprintf(Baum, 'setgenerator OFF');
+                
+                kalib4_3 = 1;
+            else
+                kalib4_3 = 0;
+            end;
+        
+            kalib4 = kalib4_1 * kalib4_2 * kalib4_3;
         end; %end if 'high' 4 part 
         
-        fprintf(VSG,':OUTP OFF');
+        %fprintf(VSG,':OUTP OFF');
         
         %part 5
         
@@ -525,12 +550,6 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         k1 = turn_NG(Ant,NG1_adr,'00000000');   %turn off NG1
         k2 = turn_NG(Ant,NG2_adr,'00000000');   %turn off NG2
                                
-        %part 6 for BMSTU
-        
-        disp('calib part BMSTU');
-        
-        kalib6 = 1;
-        
         %calculations
         
         disp('calib calc');
@@ -542,10 +561,9 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
         kalib3v = 1;
         kalib4 = 1;
         kalib5 = 1;
-        kalib6 = 1;
         %---------------
         
-        if (kalib1 * kalib2 * kalib3 * kalib3v * kalib4 * kalib5 * kalib6) ~= 0
+        if (kalib1 * kalib2 * kalib3 * kalib3v * kalib4 * kalib5) ~= 0
         
             %added constants are switch parameters
             %they might be specified with real switches  
@@ -592,8 +610,7 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
             disp(kalib3v);
             disp(kalib4);
             disp(kalib5);
-            disp(kalib6);
-            
+                        
             fi1 = 0;
             fi246 = 0;
             fi248 = 0;

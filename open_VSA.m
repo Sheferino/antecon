@@ -9,14 +9,15 @@ try
     % obj = tcpip(ip_adres,port_number,'InputBufferSize',1E5,'ByteOrder','littleEndian','Timeout', 10);
     fopen(obj);
 catch
+    obj = '';
     flag = 0;
     st = 'VSA tcp/ip opening error';
 end;
 
 if flag 
     st = query(obj,'*IDN?');
-    fprintf(obj,':CAL:AUTO OFF');   %mover from calib_path
-    pause(0.1);
+    %fprintf(obj,':CAL:AUTO OFF');   %mover from calib_path
+    %pause(0.1);
     fprintf(obj,':CAL');
 end;
 
