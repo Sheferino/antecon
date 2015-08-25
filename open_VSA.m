@@ -18,7 +18,9 @@ if flag
     st = query(obj,'*IDN?');
     %fprintf(obj,':CAL:AUTO OFF');   %mover from calib_path
     %pause(0.1);
-    fprintf(obj,':CAL');
+    if str2double(query(obj,':STAT:QUES:CAL:COND?')) ~= 0
+        fprintf(obj,':CAL');
+    end;
 end;
 
 if findstr(st,ID) == 0

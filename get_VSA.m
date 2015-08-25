@@ -47,14 +47,7 @@ function [A, time] = get_VSA(VSA, f)
     time = str2double(strtok(st,','));
     pause(0.1)
     
-    i = 1;
-    while (get(VSA,'BytesAvailable') > 0)
-       
-        B(i) = fread(VSA,1,'float');
-        pause(0.001);
-        i = i+1;
-    
-    end;
+    flushinput(VSA);
     
     C(1)=[];
     %C(numel(C))=[];
