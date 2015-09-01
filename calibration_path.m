@@ -69,41 +69,54 @@ calibration_path(Ant,PW1,PW2,PW3,PW4,Baum,VSA,VSG,path,f_sig,P0,PA6,PA7)
     end
 
     function k = calib_PW(PW)               %PW self-calibration
-                    
-       st = query(PW,':CAL?');
-       flag = str2double(st);
-       if flag == 1
-           k = 0;
-           fprintf(PW,':CAL:ZERO:NORM:AUTO ONCE');
-           while str2double(query(PW,'*OPC?')) ~= 1
-           end;
-           fprintf(PW,':CAL');
-           while str2double(query(PW,'*OPC?')) ~= 1
-           end;
-           st = query(PW,':CAL?');
-           if str2double(st) == 0 
-               k = 1;
-           end;
-       else
-           st = query(PW,'*IDN?');
-           disp(st);
-           k = 0;
-       end;
        
-       if k == 1
-           fprintf(PW,'CALC1:FEED1 "POW:AVER"');
-           %fprintf(PW,'');
-           fprintf(PW,'FORM REAL');
-       else
-           disp('Calibration is failed for:');
-           disp(st);
-           disp(PW);
-       end;
-          
+        k = 0;
+        
+        fprintf(PW,'*RST');
+        pause(0.1);
+        
+        fprintf(PW,':CAL1:ZERO:TYPe INT');
+        pause(0.1);
+
+        fprintf(PW,':CAL1:ZERO:AUTO ON');
+        pause(0.1);
+
+        fprintf(PW,':CAL1:AUTO ON');
+        pause(0.1);
+        
+        fprintf(PW,':FORM ASCii');
+        pause(0.1); 
+
+        fprintf(PW,':CAL1');
+        
+        s = 1;
+        while s ~= 0  
+            s = str2double(query(PW,':STATus:OPERation:CAL?'));
+            pause(0.5);
+        end;
+        
+        B = [':FREQ ' f_sig ' MHz'];
+        fprintf(PW,B);
+        pause(0.1);
+
+        fprintf(PW,':AVER:COUNt:AUTO ON')
+        pause(0.1);
+
+        fprintf(PW,':UNIT1:POW DBM')
+        pause(0.1); 
+        
+        st = query(PW,':STATus:QUEStionable:CAL?');
+        
+        if str2double(st) == 0 
+            k = 1;
+        end;
+            
     end %end calib_PW
 
     function P = get_PW(PW)                 %get PW data (power, 1 val)
-        st = query(PW,'MEAS1?');
+        fprintf(PW,':READ1?');
+        pause(1);
+        st = fscanf(PW);
         P = str2double(st);
     end
 
