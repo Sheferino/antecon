@@ -25,7 +25,7 @@ ID=char(fread(obj,[1,obj.BytesAvailable],'char'));
 
 if isempty(strfind(ID, ID_NAP))
     fclose(obj);
-    obj_NAP='';
+    obj='';
     error='NAP ne tot';
 end
     

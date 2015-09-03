@@ -52,11 +52,15 @@ switch TargetSV(1)
         %% Raschet koordinat GLO
         if ~flag_EphExist %proverka nalichiya efemerid
             error='Net efemerid';
+            x_sat=[];
+            y_sat=[];
+            z_sat=[];
             return
         end
-        x_sat=x+vx+ax;
-        y_sat=y+vy+ay;
-        z_sat=z+vz+az;
+        [~,Y] = ode45(@GLOEphemFunc,1:1:900,[x y z vx vy vz ax ay az]*1E3);
+        x_sat=Y(:,1);
+        y_sat=Y(:,2);
+        z_sat=Y(:,3);
         
 end
 
